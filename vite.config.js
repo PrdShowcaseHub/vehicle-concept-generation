@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/PDDA-Assistant/',
+  base: '/vehicle-concept-generation/',
   build: {
     rollupOptions: {
       input: {
