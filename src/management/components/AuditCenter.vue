@@ -373,15 +373,27 @@ function regenerateReport(id) {
               <td><strong>{{ r.name }}</strong></td>
               <td>{{ r.brand }}</td>
               <td>{{ r.segment }}</td>
-              <td>
+              <td style="white-space:nowrap;">
                 <span v-if="r.fileType === 'original'" class="badge badge-gray">原始文件</span>
                 <span v-else class="badge badge-blue">副本</span>
               </td>
-              <td><span class="badge" :class="'badge-' + statusMeta(r.status).color">{{ statusMeta(r.status).label }}</span></td>
+              <td style="white-space:nowrap;"><span class="badge" :class="'badge-' + statusMeta(r.status).color">{{ statusMeta(r.status).label }}</span></td>
               <td>{{ r.creator }}</td>
               <td class="text-sm text-muted">{{ r.createdAt }}</td>
               <td>
-                <button class="btn btn-ghost" @click.stop="openAudit(r.id)">{{ r.fileType === 'original' ? '查看' : '审核' }}</button>
+                <button class="btn btn-ghost" @click.stop="openAudit(r.id)">{{ r.fileType === 'original' ? '查看' : (r.status === 'published' ? '查看' : '审核') }}</button>
+                <button
+                  v-if="r.fileType === 'original'"
+                  class="btn btn-ghost"
+                  style="color:var(--c-primary)"
+                  @click.stop="showCreateCopyModal(r.id)"
+                >创建副本</button>
+                <button
+                  v-if="canReview && r.fileType !== 'original' && r.status === 'draft'"
+                  class="btn btn-ghost"
+                  style="color:var(--c-primary)"
+                  @click.stop="submitForReview(r.id)"
+                >提交校验</button>
                 <button
                   v-if="canReview && r.fileType !== 'original' && r.status === 'verified'"
                   class="btn btn-ghost"

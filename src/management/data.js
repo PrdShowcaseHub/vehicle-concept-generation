@@ -1,5 +1,7 @@
 // ============== Mock data ==============
-export const mockReports = [
+import { reactive } from 'vue'
+
+export const mockReports = reactive([
   {
     id: 'RPT-20260814-001',
     name: '长安启源A07 · 6-8万紧凑型PHEV轿车',
@@ -124,7 +126,59 @@ export const mockReports = [
     versions: [{ v: 'v1.0', time: '2026-08-24 09:48', desc: '工作台初始生成版本' }],
     steps: generateSteps('长安UNI-V', '主流品质产品圈'),
   },
-];
+  // ============ 不同状态的副本数据 ============
+  {
+    id: 'RPT-20260825-008',
+    name: '长安启源Q05 · 5-7万紧凑SUV（副本）',
+    brand: '长安启源',
+    segment: '紧凑SUV',
+    priceRange: '5-7万',
+    energy: 'PHEV',
+    launchYear: '2028',
+    status: 'draft',
+    fileType: 'copy',
+    parentId: 'RPT-20260820-003',
+    parentVersion: 'v1.0',
+    creator: '审核员 · 周婷',
+    createdAt: '2026-08-25 14:20',
+    publishedAt: null,
+    steps: generateSteps('长安启源Q05', '入门紧凑产品圈').filter(s => s.id !== 's12'),
+  },
+  {
+    id: 'RPT-20260826-009',
+    name: '阿维塔12 · 25-35万中大型电动轿跑（副本）',
+    brand: '阿维塔',
+    segment: '中大型轿跑',
+    priceRange: '25-35万',
+    energy: 'BEV',
+    launchYear: '2028',
+    status: 'reviewing',
+    fileType: 'copy',
+    parentId: 'RPT-20260822-004',
+    parentVersion: 'v1.0',
+    creator: '审核员 · 周婷',
+    createdAt: '2026-08-26 10:35',
+    publishedAt: null,
+    steps: generateSteps('阿维塔12', '高端品质产品圈').filter(s => s.id !== 's12'),
+  },
+  {
+    id: 'RPT-20260828-010',
+    name: '长安UNI-V · 8-11万紧凑运动轿车（副本）',
+    brand: '长安',
+    segment: '紧凑型轿车',
+    priceRange: '8-11万',
+    energy: 'ICE',
+    launchYear: '2028',
+    status: 'verified',
+    fileType: 'copy',
+    parentId: 'RPT-20260824-005',
+    parentVersion: 'v1.0',
+    creator: '审核员 · 周婷',
+    createdAt: '2026-08-28 16:42',
+    publishedAt: null,
+    steps: generateSteps('长安UNI-V', '主流品质产品圈').filter(s => s.id !== 's12'),
+  },
+]);
 
 export function generateSteps(productName, circle) {
   return [
