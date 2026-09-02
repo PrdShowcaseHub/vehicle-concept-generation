@@ -52,14 +52,14 @@ function openBook(b) {
         return {
           code: x.code, name: x.name,
           grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级',
-          target: graded ? '【待共创确认】' : '【待共创确认】', ours: '—', rival: '—', gap: '—',
+          target: '待确认', ours: '—', rival: '—', gap: '—',
           status: '待定义',
         }
       })
     } else {
       const h = seeded(l2.code)
       const graded = (h % 100) < b.progress
-      map[l2.code] = [{ code: l2.code, name: l2.name, grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级', target: '【待共创确认】', ours: '—', rival: '—', gap: '—', status: '待定义' }]
+      map[l2.code] = [{ code: l2.code, name: l2.name, grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级', target: '待确认', ours: '—', rival: '—', gap: '—', status: '待定义' }]
     }
   }))
   targetsMap.value = map

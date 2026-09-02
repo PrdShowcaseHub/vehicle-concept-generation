@@ -23,16 +23,23 @@ function ringColor(v, max) {
 function startEdit(idx) {
   editIdx.value = idx
   const r = rows.value[idx]
-  editForm.value = { tcode: r.tcode, tname: r.tname }
+  // 已有映射时回填为「码 名称」完整文本，保证编辑框可读
+  editForm.value = { tcode: r.tcode ? (r.tname ? r.tcode + ' ' + r.tname : r.tcode) : '', tname: r.tname }
 }
 
 function saveEdit() {
   const r = rows.value[editIdx.value]
-  const pick = editForm.value.tcode
+  const pick = (editForm.value.tcode || '').trim()
   if (pick) {
-    const [code, ...rest] = pick.split(' ')
+    const [code, ...rest] = pick.split(/\s+/)
+    let name = rest.join(' ') || ''
+    if (!name) {
+      // 仅输入编码时，从候选码表补全名称
+      const hit = CODE_OPTIONS.find(o => o.split(/\s+/)[0] === code)
+      if (hit) name = hit.split(/\s+/).slice(1).join(' ')
+    }
     r.tcode = code
-    r.tname = rest.join(' ') || r.tname
+    r.tname = name || r.tname
     if (r.status === '未映射') {
       r.status = '一对一'
       r.reason = ''
@@ -83,14 +90,9 @@ function statusBadge(s) {
     </div>
   </div>
 
-  <!-- 冲突告警 -->
-  <div class="cm-alert-warning">
-    <strong>⚠ 检测到 8 项多对一冲突。</strong>二段码生成规则因项目而异（选装、颜色等影响状态码），考虑用AI工具辅助生成。待秦超/阳文君专题会确认规则。
-  </div>
-
   <!-- 映射关系表 -->
   <div class="data-table">
-    <div class="cm-card-title">映射关系维护<span class="text-muted text-sm">共 {{ rows.length }} 项（示例）</span></div>
+    <div class="cm-card-title">映射关系维护<span class="text-muted text-sm">共 {{ rows.length }} 项</span></div>
     <table>
       <thead>
         <tr><th>市场配置编码</th><th>配置名称</th><th>工程二段码</th><th>二段码名称</th><th>对应状态</th><th>冲突原因</th><th>操作</th></tr>
@@ -101,10 +103,11 @@ function statusBadge(s) {
           <td>{{ r.name }}</td>
           <template v-if="editIdx === i">
             <td colspan="2">
-              <select class="form-select" v-model="editForm.tcode" style="width: 100%; height: 30px; font-size: 12px">
-                <option value="" disabled>请选择工程二段码</option>
+              <input class="form-input cm-code-input" list="cm-tcode-options" v-model="editForm.tcode"
+                     placeholder="请选择或输入工程二段码" @keyup.enter="saveEdit">
+              <datalist id="cm-tcode-options">
                 <option v-for="o in CODE_OPTIONS" :key="o" :value="o">{{ o }}</option>
-              </select>
+              </datalist>
             </td>
             <td><span class="badge badge-blue">编辑中</span></td>
             <td>—</td>
@@ -115,9 +118,9 @@ function statusBadge(s) {
           </template>
           <template v-else>
             <td v-if="r.tcode">{{ r.tcode }}</td>
-            <td v-else class="text-muted">【待补充】</td>
+            <td v-else class="text-muted">—</td>
             <td v-if="r.tname">{{ r.tname }}</td>
-            <td v-else class="text-muted">【待补充】</td>
+            <td v-else class="text-muted">—</td>
             <td><span class="badge" :class="statusBadge(r.status)">{{ r.status }}{{ r.status === '多对一' ? ' ⚠' : '' }}{{ r.status === '未映射' ? ' ✕' : '' }}</span></td>
             <td>{{ r.reason || '—' }}</td>
             <td>
@@ -160,7 +163,7 @@ function statusBadge(s) {
       <div class="cm-conflict-reason">冲突原因：{{ rows[conflictIdx].reason }}</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" @click="conflictIdx = -1">关闭</button>
-        <button class="btn btn-primary" @click="conflictIdx = -1; emit('toast', '已发起工程侧确认（待秦超/阳文君专题会）', 'success')">发起工程确认</button>
+        <button class="btn btn-primary" @click="conflictIdx = -1; emit('toast', '已发起工程侧确认', 'success')">发起工程确认</button>
       </div>
     </div>
   </div>
@@ -175,10 +178,7 @@ function statusBadge(s) {
 .cm-kpi-label { font-size: 12px; color: var(--c-text-muted); }
 .cm-kpi-value { font-size: 24px; font-weight: 700; line-height: 1.2; }
 .cm-kpi-desc { font-size: 11px; color: var(--c-text-secondary); }
-.cm-alert-warning {
-  background: #FFFAEB; border: 1px solid #FDE68A; border-radius: 8px;
-  padding: 12px 16px; font-size: 13px; color: #92400E; margin-bottom: 16px; line-height: 1.7;
-}
+.cm-code-input { min-width: 240px; height: 30px; font-size: 12px; padding: 0 8px; }
 .cm-card-title {
   font-size: 14px; font-weight: 700; padding: 14px 16px 12px;
   display: flex; align-items: center; justify-content: space-between;

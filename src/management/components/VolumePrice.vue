@@ -105,9 +105,9 @@ const priceSummary = computed(() => {
   })
   const main = mixAvg.length ? mixAvg.slice().sort((a, b) => b.avg - a.avg)[0] : null
   return {
-    total: total ? total.toLocaleString('en-US') + ' 辆' : '【待补充】',
-    std: stdVals.length ? `¥${Math.min(...stdVals).toLocaleString('en-US')} ~ ¥${Math.max(...stdVals).toLocaleString('en-US')}` : '【待补充】',
-    main: main ? `${main.level}（MIX 均值 ${Math.round(main.avg)}%）` : '【待补充】',
+    total: total ? total.toLocaleString('en-US') + ' 辆' : '—',
+    std: stdVals.length ? `¥${Math.min(...stdVals).toLocaleString('en-US')} ~ ¥${Math.max(...stdVals).toLocaleString('en-US')}` : '—',
+    main: main ? `${main.level}（MIX 均值 ${Math.round(main.avg)}%）` : '—',
   }
 })
 
@@ -134,7 +134,7 @@ function openEditor(id, isNew) {
     const draft = c.versions.find(v => v.status === '草稿') || c.versions[0]
     editorMeta.ver = draft.ver
     editorMeta.ms = draft.ms
-    editorMeta.summary = draft.summary.startsWith('【待补充') ? '' : draft.summary
+    editorMeta.summary = draft.summary === '—' ? '' : draft.summary
     editorStatus.value = draft.status
   }
   editorMeta.reason = '用户需求洞察'
@@ -344,7 +344,6 @@ const changeReasons = ['用户需求洞察', '市场竞争变化', '公司战略
           </template>
         </tbody>
       </table>
-      <div class="vp-note">注：Lev1/Lev2/Lev3 为同一配置项在不同配置等级下的取值，依据《标准配置原子库》结构呈现；示例数据，待 EATP 对接后替换真实值。</div>
     </div>
 
     <!-- Tab2 版本记录 -->
@@ -432,7 +431,6 @@ const changeReasons = ['用户需求洞察', '市场竞争变化', '公司战略
           </template>
         </tbody>
       </table>
-      <div class="vp-note">注：量价方案依据《XX项目生命周期量价规划方案》结构呈现（销量 / MIX / 预算标准价 / 选装包），示例数据，待量价模块对接后替换。</div>
     </div>
 
     <!-- 版本更新内容弹窗 -->

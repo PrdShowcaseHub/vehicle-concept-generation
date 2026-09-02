@@ -51,7 +51,7 @@ export const CONFIG_CARS = {
         },
       },
       { ver: 'V2026.06', ms: 'FKO', owner: '陈思远', status: '已发布', date: '2026-06-15', summary: '初版配置表，基于EATP在研全量原子库', change: null },
-      { ver: 'V2027.01', ms: 'CC', owner: '陈思远', status: '草稿', date: '—', summary: '【待补充：CC版变更摘要】', change: null },
+      { ver: 'V2027.01', ms: 'CC', owner: '陈思远', status: '草稿', date: '—', summary: '—', change: null },
     ],
     price: {
       sales: [{ rows: [
@@ -260,23 +260,23 @@ export const CONFIG_CARS = {
       '座椅通风/加热': { l1: '前排加热', l2: '前排通风加热', l3: '全车通风加热+按摩' },
     },
     versions: [
-      { ver: 'V2027.01', ms: 'CC', owner: '陈思远', status: '草稿', date: '—', summary: '【待补充：CC版变更摘要】', change: null },
+      { ver: 'V2027.01', ms: 'CC', owner: '陈思远', status: '草稿', date: '—', summary: '—', change: null },
     ],
     price: {
       sales: [{ rows: [
-        { level: 'Lev1', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' },
-        { level: 'Lev2', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' },
-        { level: 'Lev3', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' }] }],
+        { level: 'Lev1', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
+        { level: 'Lev2', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
+        { level: 'Lev3', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' }] }],
       mix: [{ rows: [
         { level: 'Lev1', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
         { level: 'Lev2', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
         { level: 'Lev3', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' }] }],
       std: [{ rows: [
-        { level: 'Lev1', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' },
-        { level: 'Lev2', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' },
-        { level: 'Lev3', y25: '【待补充】', y26: '【待补充】', y27: '【待补充】', y28: '【待补充】', y29: '【待补充】' }] }],
+        { level: 'Lev1', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
+        { level: 'Lev2', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' },
+        { level: 'Lev3', y25: '—', y26: '—', y27: '—', y28: '—', y29: '—' }] }],
       options: [{ name: '越野选装包', content: '差速锁+AT胎', range: 'Lev3', rows: [
-        { level: 'Lev3', price: '【待补充】', sales: '【待补充】', rate: '【待补充】' }] }],
+        { level: 'Lev3', price: '—', sales: '—', rate: '—' }] }],
     },
   },
 }
@@ -305,7 +305,7 @@ export const CODE_MAPPING = [
   { code: 'CFG-003', name: '电动尾门', tcode: '2E-005', tname: '电动尾门模块', status: '一对一', reason: '' },
   { code: 'CFG-004', name: 'LED矩阵大灯', tcode: '2L-012', tname: '前大灯总成', status: '多对一', reason: '与普通LED灯共用总成码' },
   { code: 'CFG-005', name: '座椅通风', tcode: '2S-028', tname: '座椅通风模块', status: '一对一', reason: '' },
-  { code: 'CFG-006', name: 'HUD抬头显示', tcode: '', tname: '', status: '未映射', reason: '二段码规则待专题会确认' },
+  { code: 'CFG-006', name: 'HUD抬头显示', tcode: '', tname: '', status: '未映射', reason: '' },
   { code: 'CFG-007', name: '无线充电', tcode: '2P-015', tname: '无线充电模块', status: '一对一', reason: '' },
   { code: 'CFG-008', name: 'L2辅助驾驶', tcode: '2A-003', tname: '辅助驾驶域控', status: '多对一', reason: 'L2/L2+共用域控二段码' },
 ]
