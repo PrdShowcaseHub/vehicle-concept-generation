@@ -229,12 +229,12 @@ const gapVerdict = computed(() => {
               </span>
             </div>
             <table>
-              <thead><tr><th>配置项</th><th>类别</th><th>竞品数</th><th>2024装备率</th><th>2025装备率</th><th>2026装备率</th><th>增长率(25→26)</th></tr></thead>
+              <thead><tr><th>配置项</th><th>类别</th><th title="样本车型数：纳入装备率统计的全部在售车型型号数（装备率分母）">样本车型数</th><th>2024装备率</th><th>2025装备率</th><th>2026装备率</th><th>增长率(25→26)</th></tr></thead>
               <tbody>
                 <tr v-for="r in equipList" :key="r.name">
                   <td>{{ r.name }}</td>
                   <td><span class="badge" :class="{ 基础: 'badge-green', 差异: 'badge-amber', 趋势: 'badge-purple' }[r.category]">{{ r.category }}</span></td>
-                  <td>{{ r.competitors }}</td>
+                  <td>{{ r.sampleCount }}</td>
                   <td>{{ r.y24 }}%</td><td>{{ r.y25 }}%</td><td>{{ r.y26 }}%</td>
                   <td><span style="color: #067647; font-weight: 600">+{{ (((r.y26 - r.y25) / r.y25) * 100).toFixed(1) }}% ↗</span></td>
                 </tr>

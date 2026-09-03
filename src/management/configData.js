@@ -282,15 +282,16 @@ export const CONFIG_CARS = {
 }
 
 // ---------- 3. 装备率分析 ----------
+// sampleCount（样本车型数）= 装备率统计分母：当前细分市场+价格段下纳入统计的全部在售车型型号数，不同配置存在微小样本差异（按配置有效样本统计）
 export const EQUIP_DATA = [
-  { name: '全景天窗', category: '基础', competitors: 23, y24: 78, y25: 82, y26: 85 },
-  { name: '电动尾门', category: '基础', competitors: 23, y24: 68, y25: 73, y26: 76 },
-  { name: 'L2辅助驾驶', category: '基础', competitors: 23, y24: 52, y25: 62, y26: 68 },
-  { name: 'LED矩阵大灯', category: '差异', competitors: 23, y24: 38, y25: 42, y26: 48 },
-  { name: '座椅通风', category: '差异', competitors: 23, y24: 35, y25: 38, y26: 42 },
-  { name: 'HUD抬头显示', category: '趋势', competitors: 23, y24: 12, y25: 16, y26: 22 },
-  { name: '无线充电', category: '趋势', competitors: 23, y24: 14, y25: 18, y26: 25 },
-  { name: '5G车机', category: '趋势', competitors: 23, y24: 5, y25: 10, y26: 18 },
+  { name: '全景天窗', category: '基础', sampleCount: 23, y24: 78, y25: 82, y26: 85 },
+  { name: '电动尾门', category: '基础', sampleCount: 21, y24: 68, y25: 73, y26: 76 },
+  { name: 'L2辅助驾驶', category: '基础', sampleCount: 24, y24: 52, y25: 62, y26: 68 },
+  { name: 'LED矩阵大灯', category: '差异', sampleCount: 20, y24: 38, y25: 42, y26: 48 },
+  { name: '座椅通风', category: '差异', sampleCount: 22, y24: 35, y25: 38, y26: 42 },
+  { name: 'HUD抬头显示', category: '趋势', sampleCount: 19, y24: 12, y25: 16, y26: 22 },
+  { name: '无线充电', category: '趋势', sampleCount: 25, y24: 14, y25: 18, y26: 25 },
+  { name: '5G车机', category: '趋势', sampleCount: 18, y24: 5, y25: 10, y26: 18 },
 ]
 
 export const EQUIP_CANDIDATES = [

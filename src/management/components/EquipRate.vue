@@ -16,6 +16,13 @@ const filtered = computed(() => rows.value.filter(r => {
   if (search.value && !r.name.includes(search.value)) return false
   return true
 }))
+// 样本车型数：不同配置按有效样本统计存在微小差异，标题展示当前列表的样本区间
+const sampleCountLabel = computed(() => {
+  const vals = filtered.value.map(r => r.sampleCount).filter(Boolean)
+  if (!vals.length) return '—'
+  const lo = Math.min(...vals), hi = Math.max(...vals)
+  return lo === hi ? lo + ' 款' : lo + '~' + hi + ' 款'
+})
 
 function growth(r) {
   if (r.y25 === 0) return null
@@ -46,7 +53,7 @@ function togglePick(name) {
 
 function confirmAdd() {
   picked.value.forEach(name => {
-    rows.value.push({ name, category: '趋势', competitors: 23, y24: 6, y25: 9, y26: 13 })
+    rows.value.push({ name, category: '趋势', sampleCount: 18 + Math.floor(Math.random() * 9), y24: 6, y25: 9, y26: 13 })
   })
   emit('toast', `已添加 ${picked.value.length} 项配置（默认归为趋势配置，按阈值自动归类）`, 'success')
   picked.value = []
@@ -90,11 +97,11 @@ function confirmAdd() {
 
   <!-- 竞争圈配置装备率清单 -->
   <div class="data-table">
-    <div class="er-card-title">竞争圈配置装备率清单<span class="text-muted text-sm">{{ filtered.length }} 项配置 | 23 款竞品车型</span></div>
+    <div class="er-card-title">竞争圈配置装备率清单<span class="text-muted text-sm">{{ filtered.length }} 项配置 | 样本车型 {{ sampleCountLabel }}</span></div>
     <table>
       <thead>
         <tr>
-          <th style="width: 120px">配置项</th><th style="width: 76px">类别</th><th style="width: 56px">竞品数</th>
+          <th style="width: 120px">配置项</th><th style="width: 76px">类别</th><th style="width: 90px" title="样本车型数：当前细分市场+价格段下纳入装备率统计的全部在售车型型号数（装备率分母）">样本车型数</th>
           <th>2024年装备率</th><th>2025年装备率</th><th>2026年装备率</th>
           <th style="width: 100px">增长率(25→26)</th><th style="width: 44px">操作</th>
         </tr>
@@ -103,7 +110,7 @@ function confirmAdd() {
         <tr v-for="(r, i) in filtered" :key="r.name">
           <td>{{ r.name }}</td>
           <td><span class="badge" :class="{ 基础: 'badge-green', 差异: 'badge-amber', 趋势: 'badge-purple' }[r.category]">{{ r.category }}</span></td>
-          <td>{{ r.competitors }}</td>
+          <td>{{ r.sampleCount }}</td>
           <td v-for="y in ['y24', 'y25', 'y26']" :key="y">
             <div class="er-bar-wrap">
               <div class="er-bar-track">
