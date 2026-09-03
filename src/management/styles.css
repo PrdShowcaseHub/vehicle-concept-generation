@@ -216,6 +216,8 @@ table { border-collapse: collapse; width: 100%; }
   font-size: 11px;
   font-weight: 600;
   line-height: 1.4;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .badge-gray { background: #F2F4F7; color: #475467; }
 .badge-amber { background: #FFFAEB; color: #B54708; }
@@ -223,6 +225,7 @@ table { border-collapse: collapse; width: 100%; }
 .badge-green { background: #ECFDF3; color: #067647; }
 .badge-red { background: #FEF3F2; color: #B42318; }
 .badge-purple { background: #F4F0FF; color: #6938EF; }
+.badge-orange { background: #FFF7ED; color: #C2410C; }
 
 .card {
   background: var(--c-surface);
