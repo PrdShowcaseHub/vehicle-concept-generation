@@ -24,10 +24,13 @@ const STEPS = [
 ]
 
 function openProject(p) {
+  // 切方案前：把当前方案的工作数据存档，避免不同方案之间数据串台
+  snapshotToCache(currentProject.value)
   currentProject.value = p
-  step.value = p.step || 1
   validateTab.value = 'EATP目标验证'
   view.value = 'workspace'
+  if (!projCache[p.id]) projCache[p.id] = defaultWorkspace()
+  restoreWorkspace(p, projCache[p.id])
 }
 
 function phaseBadge(phase) {
@@ -102,13 +105,109 @@ const gapVerdict = computed(() => {
   if (v < 0.6) return { text: '级差低于目标范围：上一级配置更具产品力，审视效益后决定是否审减', type: 'warn' }
   return { text: '级差高于目标范围：上一级配置竞争力不足，审视增配提升价值', type: 'warn' }
 })
+
+// ============== 方案列表：新建 + 项目级数据存档 ==============
+const projects = ref(COMBO_PROJECTS.map(p => ({ ...p })))
+const todayStr = () => {
+  const d = new Date()
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+const defaultVer = () => {
+  const d = new Date()
+  return 'V' + d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0')
+}
+
+// 候选车型（与量价管理车型目录同源）
+const CAR_CANDIDATES = [
+  { code: 'C798', carName: '长安启源 C798', kind: '中大型SUV · 增程 REEV' },
+  { code: 'C390', carName: '深蓝 G318', kind: '硬派SUV · 增程 REEV' },
+  { code: 'C673', carName: '长安 CS75PLUS', kind: '紧凑型SUV · 燃油 GAS' },
+  { code: 'C857', carName: '深蓝 SL03', kind: '中型轿车 · 纯电 EV' },
+  { code: 'C928', carName: '长安 UNI-V', kind: '紧凑型轿车 · 插混 PHEV' },
+  { code: 'C363', carName: '欧尚 Z6', kind: '紧凑型SUV · 油混 HEV' },
+]
+// 流程阶段 → 默认入口步骤/环节（与左侧步骤导航对应）
+const PHASE_START = {
+  'FKO-KO 搭建': { step: 1, stage: '量价承接' },
+  'KO节点交付': { step: 6, stage: '形成配置表' },
+  'KO-CC 变更管理': { step: 7, stage: '变更审视' },
+}
+
+// 每个方案独立的工作数据存档（步骤2宽度决策 / 步骤4梯度 / 步骤5计算器 / 当前步骤）
+const projCache = {}
+function snapshotToCache(p) {
+  if (!p) return
+  projCache[p.id] = {
+    widthRows: widthRows.value.map(r => ({ ...r })),
+    trims: trims.value.map(t => ({ ...t })),
+    eatp: { ...eatp }, gap: { ...gap }, step: step.value,
+  }
+}
+function defaultWorkspace() {
+  return {
+    widthRows: WIDTH_LIST.map(r => ({ ...r })),
+    trims: GRADIENT_TRIMS.map(t => ({ ...t })),
+    eatp: { atp: 159800, btp: 149800, cpvDiff: 4200, benchmark: '长安启源 vs 比亚迪（短期）' },
+    gap: { lowPrice: 139800, highPrice: 159800, lowCpv: 4100, highCpv: 6300 },
+  }
+}
+function restoreWorkspace(p, st) {
+  widthRows.value = st.widthRows.map(r => ({ ...r }))
+  trims.value = st.trims.map(t => ({ ...t }))
+  Object.assign(eatp, st.eatp)
+  Object.assign(gap, st.gap)
+  step.value = st.step || p.step || 1
+}
+
+function goList() {
+  snapshotToCache(currentProject.value)
+  view.value = 'list'
+}
+
+function saveProgress() {
+  const p = currentProject.value
+  snapshotToCache(p)
+  p.step = step.value
+  p.updated = todayStr()
+  emit('toast', '已保存当前步骤进展（本方案数据已存档）', 'success')
+}
+
+// ---------- 新建方案 ----------
+const createOpen = ref(false)
+const createForm = ref({ carText: '', price: '14-18万', phase: 'FKO-KO 搭建', version: '', owner: '陈思远' })
+function openCreate() {
+  createForm.value = { carText: '', price: '14-18万', phase: 'FKO-KO 搭建', version: defaultVer(), owner: '陈思远' }
+  createOpen.value = true
+}
+function submitCreate() {
+  const f = createForm.value
+  const t = (f.carText || '').trim()
+  if (!t) { emit('toast', '请选择车型项目', 'warn'); return }
+  let car = CAR_CANDIDATES.find(c => c.carName === t) || CAR_CANDIDATES.find(c => c.code === t.toUpperCase())
+  const code = car ? car.code : 'CX' + Math.floor(100 + Math.random() * 900)
+  const carName = car ? car.carName : t
+  const kind = car ? car.kind : '自定义车型'
+  const start = PHASE_START[f.phase] || { step: 1, stage: '量价承接' }
+  const p = {
+    id: 'CB-' + code, carCode: code, carName,
+    segment: kind + ' · ' + f.price,
+    phase: f.phase, stage: start.stage, step: start.step,
+    owner: f.owner, versions: (f.version || '').trim() || defaultVer(),
+    updated: todayStr(),
+  }
+  projects.value.push(p)
+  projCache[p.id] = defaultWorkspace()
+  createOpen.value = false
+  openProject(p)
+  emit('toast', '已创建配置组合方案「' + carName + '」并进入工作区', 'success')
+}
 </script>
 
 <template>
   <!-- ================= 方案列表 ================= -->
   <div v-if="view === 'list'">
     <div class="toolbar">
-      <button class="btn btn-primary" @click="emit('toast', '新建配置组合方案：选择车型项目后进入六大步骤工作区', 'success')">＋ 新建方案</button>
+      <button class="btn btn-primary" @click="openCreate">＋ 新建方案</button>
       <button class="btn btn-secondary" @click="emit('toast', '方案清单已导出', 'success')">导出</button>
     </div>
 
@@ -125,13 +224,13 @@ const gapVerdict = computed(() => {
     </div>
 
     <div class="data-table">
-      <div class="cc-card-title">配置组合方案清单<span class="text-muted text-sm">共 {{ COMBO_PROJECTS.length }} 个项目</span></div>
+      <div class="cc-card-title">配置组合方案清单<span class="text-muted text-sm">共 {{ projects.length }} 个项目</span></div>
       <table>
         <thead>
           <tr><th>车型项目</th><th>细分市场</th><th>流程阶段</th><th>当前环节</th><th>方案版本</th><th>责任人</th><th>最近更新</th><th>操作</th></tr>
         </thead>
         <tbody>
-          <tr v-for="p in COMBO_PROJECTS" :key="p.id" @click="openProject(p)">
+          <tr v-for="p in projects" :key="p.id" @click="openProject(p)">
             <td><strong>{{ p.carName }}</strong><div class="text-muted text-xs">{{ p.carCode }}</div></td>
             <td>{{ p.segment }}</td>
             <td><span class="badge" :class="phaseBadge(p.phase)">{{ p.phase }}</span></td>
@@ -150,13 +249,13 @@ const gapVerdict = computed(() => {
   <div v-else class="cc-workspace">
     <!-- 头部 -->
     <div class="cc-ws-header">
-      <button class="btn btn-secondary" style="height: 30px; font-size: 12px" @click="view = 'list'">← 返回方案列表</button>
+      <button class="btn btn-secondary" style="height: 30px; font-size: 12px" @click="goList">← 返回方案列表</button>
       <div>
         <div class="cc-ws-title">{{ currentProject.carName }} · 配置组合方案</div>
         <div class="cc-ws-sub">{{ currentProject.segment }} · {{ currentProject.phase }} · 责任人：{{ currentProject.owner }}</div>
       </div>
       <div class="flex gap-2">
-        <button class="btn btn-secondary" @click="emit('toast', '已保存当前步骤进展', 'success')">保存进展</button>
+        <button class="btn btn-secondary" @click="saveProgress">保存进展</button>
         <button class="btn btn-primary" @click="emit('toast', '配置组合方案已提交多方评审（项目总监/产品市场总监/财务）', 'success')">提交评审</button>
       </div>
     </div>
@@ -480,8 +579,8 @@ const gapVerdict = computed(() => {
               <div class="cc-deliver-file">
                 <div class="cc-file-icon" style="background: #EFF4FF; color: #155EEF">表</div>
                 <div>
-                  <div class="cc-file-name">C798 节点市场配置表 V2026.08.xlsx</div>
-                  <div class="cc-file-meta">配置明细 + 配置组合方案 · 基于步骤⑤验证后审视调整 · 2026-08-20</div>
+                  <div class="cc-file-name">{{ currentProject.carCode }} 节点市场配置表 {{ currentProject.versions }}.xlsx</div>
+                  <div class="cc-file-meta">配置明细 + 配置组合方案 · 基于步骤⑤验证后审视调整 · {{ currentProject.updated }}</div>
                 </div>
                 <div class="flex gap-2"><button class="btn btn-secondary" style="height: 28px; font-size: 12px">预览</button><button class="btn btn-secondary" style="height: 28px; font-size: 12px">下载</button></div>
               </div>
@@ -528,9 +627,57 @@ const gapVerdict = computed(() => {
       </div>
     </div>
   </div>
+
+  <!-- ============== 新建方案弹窗 ============== -->
+  <div v-if="createOpen" class="modal-mask" @click.self="createOpen = false">
+    <div class="modal" style="width: 540px; max-width: calc(100vw - 48px)">
+      <div class="modal-title">新建配置组合方案</div>
+      <div class="modal-desc">选择车型项目后创建方案工作区，按六大步骤承接量价方案并搭建配置组合；创建后自动进入步骤①，可随时「保存进展」。</div>
+      <div class="cc-create-field">
+        <label>车型项目</label>
+        <input class="form-input" list="cc-car-candidates" v-model="createForm.carText" placeholder="选择车型，如：长安启源 C798">
+        <datalist id="cc-car-candidates">
+          <option v-for="c in CAR_CANDIDATES" :key="c.code" :value="c.carName">{{ c.code }} · {{ c.kind }}</option>
+        </datalist>
+        <span class="cc-create-hint">候选车型与量价管理目录一致；也可以直接输入其它车型名称</span>
+      </div>
+      <div class="cc-create-grid">
+        <div class="cc-create-field">
+          <label>价格段</label>
+          <select class="form-select" v-model="createForm.price">
+            <option v-for="b in ['8-11万', '11-14万', '14-18万', '18-25万', '25万以上']" :key="b" :value="b">{{ b }}</option>
+          </select>
+        </div>
+        <div class="cc-create-field">
+          <label>起始流程阶段</label>
+          <select class="form-select" v-model="createForm.phase">
+            <option v-for="(v, k) in PHASE_START" :key="k" :value="k">{{ k }}（从步骤{{ v.step }}开始）</option>
+          </select>
+        </div>
+        <div class="cc-create-field">
+          <label>方案版本</label>
+          <input class="form-input" v-model="createForm.version" placeholder="如 V2026.09">
+        </div>
+        <div class="cc-create-field">
+          <label>责任人</label>
+          <select class="form-select" v-model="createForm.owner">
+            <option v-for="o in ['陈思远', '王铭']" :key="o" :value="o">{{ o }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" @click="createOpen = false">取消</button>
+        <button class="btn btn-primary" @click="submitCreate">创建方案</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.cc-create-field { margin-bottom: 12px; }
+.cc-create-field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--c-text-secondary); }
+.cc-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.cc-create-hint { display: block; font-size: 11px; color: var(--c-text-muted); margin-top: 5px; }
 .cc-intro {
   background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 10px;
   padding: 14px 18px; font-size: 13px; color: var(--c-text-secondary); line-height: 1.8; margin-bottom: 16px;

@@ -10,6 +10,7 @@ import EquipRate from './components/EquipRate.vue'
 import CodeMapping from './components/CodeMapping.vue'
 import ConfigCombo from './components/ConfigCombo.vue'
 import LacuDefine from './components/LacuDefine.vue'
+import RivalData from './components/RivalData.vue'
 
 // ============== Root State ==============
 const currentSection = ref('workbench')
@@ -27,12 +28,13 @@ const titles = {
   codemap: '二段码映射',
   combo: '配置组合方案',
   lacu: 'LACU定义',
+  rival: '竞品数据管理',
 }
 const pageTitle = computed(() => titles[currentSection.value] || '')
 const groups = {
   workbench: '产品概念报告', audit: '产品概念报告', reports: '产品概念报告',
   vp: '配置管理', equip: '配置管理', codemap: '配置管理',
-  combo: '产品定义', lacu: '产品定义',
+  combo: '产品定义', lacu: '产品定义', rival: '产品定义',
 }
 const breadcrumb = computed(() => {
   const g = groups[currentSection.value]
@@ -158,6 +160,14 @@ onMounted(() => {
           <span class="nav-icon">🎯</span>
           <span>LACU定义</span>
         </button>
+        <button
+          class="nav-item"
+          :class="{ active: currentSection === 'rival' }"
+          @click="switchSection('rival')"
+        >
+          <span class="nav-icon">🏁</span>
+          <span>竞品数据管理</span>
+        </button>
 
         <div class="nav-group-label">其他</div>
         <button class="nav-item" @click="toast('演示版本，暂未开放', 'warning')">
@@ -258,6 +268,12 @@ onMounted(() => {
         <!-- LACU定义 -->
         <LacuDefine
           v-else-if="currentSection === 'lacu'"
+          @toast="toast"
+        />
+
+        <!-- 竞品数据管理 -->
+        <RivalData
+          v-else-if="currentSection === 'rival'"
           @toast="toast"
         />
       </div>

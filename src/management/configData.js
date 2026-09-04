@@ -586,3 +586,37 @@ export const LACU_CHANGES = [
   { ver: 'V2.0', date: '2026-06-18', seq: 2, content: '「3.动力性」3.5加速性能下新增起步/城市路/高速路三项三级指标' },
   { ver: 'V1.0', date: '2025-11-10', seq: 1, content: '首次发布，10个一级指标、78个二级指标、186个三级指标' },
 ]
+
+// ========== 竞品数据管理 ==========
+// 竞品车型清单（含本品对标车型；配置数据周期性采集更新，来源：CAM / 汽车之家 / 威尔森）
+// msrp：指导价区间；versions：在售版本数
+export const RIVAL_CARS = [
+  { name: '比亚迪宋PLUS DM-i', price: '8-11万', level: '紧凑型SUV', energy: '插电混动', msrp: '10.28-13.98万', versions: 5, items: 653, status: '已采集', updated: '2026-08-20' },
+  { name: '哈弗H6', price: '8-11万', level: '紧凑型SUV', energy: '燃油', msrp: '9.59-12.49万', versions: 4, items: 612, status: '已采集', updated: '2026-08-20' },
+  { name: '吉利星越L', price: '11-14万', level: '紧凑型SUV', energy: '燃油', msrp: '12.22-15.52万', versions: 6, items: 598, status: '已采集', updated: '2026-08-20' },
+  { name: '长安CS75PLUS（本品对标）', price: '11-14万', level: '紧凑型SUV', energy: '燃油', msrp: '11.79-14.49万', versions: 5, items: 624, status: '已采集', updated: '2026-08-20', ours: true },
+  { name: '零跑D19 纯电720智尊版 六座', price: '20-25万', level: '大型SUV', energy: '纯电动', msrp: '21.98-24.68万', versions: 3, items: 724, status: '已采集', updated: '2026-08-23' },
+  { name: '零跑D19 纯电680三电机性能版 六座', price: '20-25万', level: '大型SUV', energy: '纯电动', msrp: '22.98-25.18万', versions: 3, items: 724, status: '部分缺失', updated: '2026-08-23' },
+  { name: '大唐 纯电 950km 后驱激光雷达旗舰型', price: '20-25万', level: '大型SUV', energy: '纯电动', msrp: '22.58-24.98万', versions: 4, items: 724, status: '已采集', updated: '2026-08-23' },
+  { name: '理想L7', price: '25-30万', level: '中大型SUV', energy: '增程', msrp: '26.18-32.18万', versions: 3, items: 689, status: '部分缺失', updated: '2026-08-21' },
+  { name: '问界M7', price: '25-30万', level: '中大型SUV', energy: '增程', msrp: '24.98-32.98万', versions: 5, items: 672, status: '待补充', updated: '2026-08-21' },
+]
+
+// 竞品配置表查看用的配置项目录（按域分组，演示粒度）
+export const RIVAL_CONFIG_GROUPS = [
+  { cat: '智能驾驶', items: [
+    'L2辅助驾驶', '高速NOA领航辅助', '城市NOA领航辅助', '自动泊车APA', '激光雷达', '360全景影像',
+  ]},
+  { cat: '智能座舱', items: [
+    '大尺寸中控屏', '副驾娱乐屏', '语音连续对话', '5G车机', 'OTA整车升级', 'HUD抬头显示', '无线充电', '面部识别',
+  ]},
+  { cat: '舒适配置', items: [
+    '全景天窗', '电动尾门', '座椅通风', '座椅加热', '座椅按摩', '真皮座椅', '前排双层玻璃', '后排出风口', '多区自动空调', '方向盘加热',
+  ]},
+  { cat: '灯光与外观', items: [
+    'LED矩阵大灯', '贯穿式尾灯', '隐藏式门把手', '电动吸合门',
+  ]},
+  { cat: '动力与补能', items: [
+    '对外放电', '快充能力', '电动四驱',
+  ]},
+]

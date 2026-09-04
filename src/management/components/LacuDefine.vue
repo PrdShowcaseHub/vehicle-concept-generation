@@ -30,6 +30,16 @@ function seeded(code) {
   return h
 }
 
+// 候选车型（与量价管理车型目录同源）
+const CAR_CANDIDATES = [
+  { code: 'C798', carName: '长安启源 C798', kind: '中大型SUV · 增程 REEV' },
+  { code: 'C390', carName: '深蓝 G318', kind: '硬派SUV · 增程 REEV' },
+  { code: 'C673', carName: '长安 CS75PLUS', kind: '紧凑型SUV · 燃油 GAS' },
+  { code: 'C857', carName: '深蓝 SL03', kind: '中型轿车 · 纯电 EV' },
+  { code: 'C928', carName: '长安 UNI-V', kind: '紧凑型轿车 · 插混 PHEV' },
+  { code: 'C363', carName: '欧尚 Z6', kind: '紧凑型SUV · 油混 HEV' },
+]
+
 // 打开目标书：初始化可编辑指标数据
 function openBook(b) {
   currentBook.value = b
@@ -40,8 +50,9 @@ function openBook(b) {
   dirty.value = false
   view.value = 'workspace'
   flowLogs.value = [{ time: today + ' 09:30', text: '进入工作区（' + b.car + ' ' + b.version + '，状态：' + b.status + '）' }]
-  // 深拷贝已有目标值
-  const map = JSON.parse(JSON.stringify(LACU_TARGETS))
+  // 新建目标书从空白开始（全部待定级/待确认），不继承既有车型预置数据；对标列预填新建时填写的对标对象
+  const rivalDefault = b._fresh ? ((b.rival || '').trim() || '—') : '—'
+  const map = b._fresh ? {} : JSON.parse(JSON.stringify(LACU_TARGETS))
   // 为所有 L2 生成/补齐行（依据目标书进度决定预置定级比例）
   LACU_TREE.forEach(l1 => l1.l2.forEach(l2 => {
     if (map[l2.code]) return
@@ -52,14 +63,14 @@ function openBook(b) {
         return {
           code: x.code, name: x.name,
           grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级',
-          target: '待确认', ours: '—', rival: '—', gap: '—',
+          target: '待确认', ours: '—', rival: rivalDefault, gap: '—',
           status: '待定义',
         }
       })
     } else {
       const h = seeded(l2.code)
       const graded = (h % 100) < b.progress
-      map[l2.code] = [{ code: l2.code, name: l2.name, grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级', target: '待确认', ours: '—', rival: '—', gap: '—', status: '待定义' }]
+      map[l2.code] = [{ code: l2.code, name: l2.name, grade: graded ? GRADE_POOL[h % GRADE_POOL.length] : '待定级', target: '待确认', ours: '—', rival: rivalDefault, gap: '—', status: '待定义' }]
     }
   }))
   targetsMap.value = map
@@ -349,13 +360,40 @@ const primaryLabel = computed(() => ({
 const secondaryLabel = computed(() => ({
   共创评审中: '退回修改', 审核批准中: '退回',
 }[currentBook.value?.status] || ''))
+
+// ============== 新建目标书 ==============
+const createOpen = ref(false)
+const createForm = ref({ car: '', node: 'FKO', version: 'V1.0', owner: '陈思远', rival: '' })
+function openCreate() {
+  createForm.value = { car: '', node: 'FKO', version: 'V1.0', owner: '陈思远', rival: '' }
+  createOpen.value = true
+}
+function submitCreate() {
+  const f = createForm.value
+  const t = (f.car || '').trim()
+  if (!t) { emit('toast', '请选择车型项目', 'warn'); return }
+  const car = CAR_CANDIDATES.find(c => c.carName === t) || CAR_CANDIDATES.find(c => c.code === t.toUpperCase())
+  const carName = car ? car.carName : t
+  const id = 'VB-02.02-D' + String(books.value.length + 1).padStart(2, '0')
+  const b = {
+    id, car: carName,
+    version: (f.version || '').trim() || 'V1.0',
+    node: f.node, status: '编制中', owner: f.owner, date: today, progress: 0,
+    rival: (f.rival || '').trim(),
+    _fresh: true, // 新建书：指标体系全量复制、全部「待定级/待确认」
+  }
+  books.value.push(b)
+  createOpen.value = false
+  openBook(b)
+  emit('toast', '已创建「' + carName + '」LACU 目标书（指标体系 10/78/186 全量复制），请开始定级', 'success')
+}
 </script>
 
 <template>
   <!-- ================= 目标书列表 ================= -->
   <div v-if="view === 'list'">
     <div class="toolbar">
-      <button class="btn btn-primary" @click="emit('toast', '新建 LACU 目标书：从最新指标体系（10/78/186）复制生成', 'success')">＋ 新建目标书</button>
+      <button class="btn btn-primary" @click="openCreate">＋ 新建目标书</button>
       <button class="btn btn-secondary" @click="emit('toast', '指标体系库：一级指标 10 · 二级指标 78 · 三级指标 186（产品策划部动态审视、定期发布）', 'default')">指标体系库</button>
     </div>
 
@@ -626,6 +664,48 @@ const secondaryLabel = computed(() => ({
       </div>
     </div>
   </div>
+
+  <!-- ============== 新建目标书弹窗 ============== -->
+  <div v-if="createOpen" class="modal-mask" @click.self="createOpen = false">
+    <div class="modal" style="width: 520px; max-width: calc(100vw - 48px)">
+      <div class="modal-title">新建 LACU 目标书</div>
+      <div class="modal-desc">从最新指标体系（一级 10 / 二级 78 / 三级 186）全量复制生成，所有指标初始为「待定级 / 待确认」，创建后进入编制，完成定级编辑即可提交共创评审。</div>
+      <div class="lc-create-field">
+        <label>车型项目</label>
+        <input class="form-input" list="lc-car-candidates" v-model="createForm.car" placeholder="选择车型，如：长安启源 C798">
+        <datalist id="lc-car-candidates">
+          <option v-for="c in CAR_CANDIDATES" :key="c.code" :value="c.carName">{{ c.code }} · {{ c.kind }}</option>
+        </datalist>
+        <span class="lc-create-hint">候选车型与量价管理目录一致；也可以直接输入其它车型名称</span>
+      </div>
+      <div class="lc-create-grid">
+        <div class="lc-create-field">
+          <label>项目节点</label>
+          <select class="form-select" v-model="createForm.node">
+            <option v-for="n in ['FKO', 'KO', 'CC', 'VS', 'LS']" :key="n" :value="n">{{ n }}</option>
+          </select>
+        </div>
+        <div class="lc-create-field">
+          <label>版本号</label>
+          <input class="form-input" v-model="createForm.version" placeholder="如 V1.0">
+        </div>
+        <div class="lc-create-field">
+          <label>责任人</label>
+          <select class="form-select" v-model="createForm.owner">
+            <option v-for="o in ['陈思远', '王铭']" :key="o" :value="o">{{ o }}</option>
+          </select>
+        </div>
+        <div class="lc-create-field">
+          <label>竞品对标对象（可选）</label>
+          <input class="form-input" v-model="createForm.rival" placeholder="如：比亚迪宋PLUS DM-i">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" @click="createOpen = false">取消</button>
+        <button class="btn btn-primary" @click="submitCreate">创建目标书</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -757,6 +837,12 @@ const secondaryLabel = computed(() => ({
 .lc-log-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 .lc-log-item { display: flex; gap: 12px; font-size: 12px; color: var(--c-text-secondary); padding: 4px 0; }
 .lc-log-time { color: var(--c-text-muted); flex-shrink: 0; }
+
+/* 新建目标书弹窗表单 */
+.lc-create-field { margin-bottom: 12px; }
+.lc-create-field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--c-text-secondary); }
+.lc-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.lc-create-hint { display: block; font-size: 11px; color: var(--c-text-muted); margin-top: 5px; }
 
 /* 弹窗 */
 .lc-modal-mask {
